@@ -26,9 +26,11 @@ input {
   color: black;
 }
 
-table {
-  border-collapse: collapse;
-  border: 0;
+  /* border-collapse: collapse; */
+table_chat {
+  border: 2;
+  cellpadding: 1; 
+  cellspacing: 1; 
 }
 
 td {

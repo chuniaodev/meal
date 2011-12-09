@@ -109,14 +109,29 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     #@tornado.web.authenticated
     def get(self):
-        #self.render("index.html", messages=MessageMixin.cache)
+
+        menu = {
+            "id": 2001,
+            "menuname": "gbjd",
+            "menuprice": 14,
+        }
+
+        menu["html"] = self.render_string("menu.html", menu=menu)
+        #if self.get_argument("next", None):
+        #    self.redirect(self.get_argument("next"))
+        #else:
+        #    self.write(menu)
+        #self.new_menus([menu])
+        self.render("index.html", messages=MessageMixin.cache)
         #self.redirect("/auth/login")
-        self.render("login.html")
+        #self.render("login.html")
 
 class MessageMixin(object):
     waiters = set()
     cache = []
     cache_size = 200
+    menu_cache = []
+    menu_cache_size = 200
 
     def wait_for_messages(self, callback, cursor=None):
         cls = MessageMixin
@@ -134,6 +149,20 @@ class MessageMixin(object):
     def cancel_wait(self, callback):
         cls = MessageMixin
         cls.waiters.remove(callback)
+
+    # new menu
+    def new_menus(self, menus):
+        cls = MessageMixin
+        logging.info("Sending new menus to %r listeners", len(cls.waiters))
+        for callback in cls.waiters:
+            try:
+                callback(menus)
+            except:
+                logging.error("Error in waiter callback", exc_info=True)
+        cls.waiters = set()
+        cls.cache.extend(menus)
+        if len(cls.cache) > self.cache_size:
+            cls.cache = cls.cache[-self.cache_size:]
 
     def new_messages(self, messages):
         cls = MessageMixin
