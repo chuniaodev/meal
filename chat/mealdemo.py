@@ -115,6 +115,12 @@ class MainHandler(BaseHandler):
             "menuname": "gbjd",
             "menuprice": 14,
         }
+	menus = (menu,{
+            "id": 2002,
+            "menuname": "yxrs",
+            "menuprice": 12,
+        }
+	)
 
         menu["html"] = self.render_string("menu.html", menu=menu)
         #if self.get_argument("next", None):
@@ -122,7 +128,7 @@ class MainHandler(BaseHandler):
         #else:
         #    self.write(menu)
         #self.new_menus([menu])
-        self.render("index.html", messages=MessageMixin.cache)
+        self.render("index.html", messages=MessageMixin.cache, menus=menus)
         #self.redirect("/auth/login")
         #self.render("login.html")
 

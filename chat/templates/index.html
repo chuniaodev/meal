@@ -57,8 +57,11 @@
 	  		</td>
 	  		
 	  		<!-- 中间列,点餐面板 -->
-	  		<td width="%30" valign="top">
+	  		<td width="%30" valign="top" align="center" >
 	  		  menus:<br>
+			        {% for menu in menus %}
+			          {% module Template("menu.html", menu=menu) %}
+			        {% end %}
 		      <div id="menu">
 		      </div>
 	  		</td>
