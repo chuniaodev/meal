@@ -87,6 +87,8 @@ class Application(tornado.web.Application):
             (r"/auth/logout", AuthLogoutHandler),
             (r"/a/message/new", MessageNewHandler),
             (r"/a/message/updates", MessageUpdatesHandler),
+            (r"/a/menu/new", MenuNewHandler),
+            (r"/a/menu/updates", MenuUpdatesHandler),
         ]
         settings = dict(
             cookie_secret="43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
@@ -109,26 +111,30 @@ class BaseHandler(tornado.web.RequestHandler):
 class MainHandler(BaseHandler):
     #@tornado.web.authenticated
     def get(self):
-
-        menu = {
-            "id": 2001,
-            "menuname": "gbjd",
-            "menuprice": 14,
-        }
-	menus = (menu,{
-            "id": 2002,
-            "menuname": "yxrs",
-            "menuprice": 12,
-        }
-	)
-
-        menu["html"] = self.render_string("menu.html", menu=menu)
         #if self.get_argument("next", None):
         #    self.redirect(self.get_argument("next"))
         #else:
         #    self.write(menu)
         #self.new_menus([menu])
-        self.render("index.html", messages=MessageMixin.cache, menus=menus)
+        menus = []
+        menufile = open("menu.db", "r")
+        try:
+            menustrs = menufile.readlines()
+            for cur in menustrs :
+                menustr = cur.strip().split(",")
+                menu = dict()
+                menu["menuid"] = menustr[0]
+                menu["menuname"] = menustr[1]
+                menu["menuprice"] = menustr[2]
+                menus.append(menu)
+        except IOError, e:
+            print "open menu.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            menufile.close()
+        #menu["html"] = self.render_string("menu.html", menu=menu)
+        self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus)
         #self.redirect("/auth/login")
         #self.render("login.html")
 
@@ -136,8 +142,6 @@ class MessageMixin(object):
     waiters = set()
     cache = []
     cache_size = 200
-    menu_cache = []
-    menu_cache_size = 200
 
     def wait_for_messages(self, callback, cursor=None):
         cls = MessageMixin
@@ -155,20 +159,6 @@ class MessageMixin(object):
     def cancel_wait(self, callback):
         cls = MessageMixin
         cls.waiters.remove(callback)
-
-    # new menu
-    def new_menus(self, menus):
-        cls = MessageMixin
-        logging.info("Sending new menus to %r listeners", len(cls.waiters))
-        for callback in cls.waiters:
-            try:
-                callback(menus)
-            except:
-                logging.error("Error in waiter callback", exc_info=True)
-        cls.waiters = set()
-        cls.cache.extend(menus)
-        if len(cls.cache) > self.cache_size:
-            cls.cache = cls.cache[-self.cache_size:]
 
     def new_messages(self, messages):
         cls = MessageMixin
@@ -190,7 +180,7 @@ class MessageNewHandler(BaseHandler, MessageMixin):
         message = {
             "id": str(uuid.uuid4()),
             #"from": self.current_user["first_name"],
-            "from": self.get_argument("nickname"),
+            "from": self.get_argument("username"),
             "body": self.get_argument("body"),
         }
         message["html"] = self.render_string("message.html", message=message)
@@ -218,6 +208,78 @@ class MessageUpdatesHandler(BaseHandler, MessageMixin):
     def on_connection_close(self):
         self.cancel_wait(self.on_new_messages)
 
+class MenuMixin(object):
+    waiters = set()
+    cache = []
+    cache_size = 200
+    #menu_cache = []
+    #menu_cache_size = 200
+
+    def wait_for_menus(self, callback, cursor=None):
+        cls = MenuMixin
+        if cursor:
+            index = 0
+            for i in xrange(len(cls.cache)):
+                index = len(cls.cache) - i - 1
+                if cls.cache[index]["id"] == cursor: break
+            recent = cls.cache[index + 1:]
+            if recent:
+                callback(recent)
+                return
+        cls.waiters.add(callback)
+
+    def cancel_wait(self, callback):
+        cls = MenuMixin
+        cls.waiters.remove(callback)
+
+    def new_menus(self, menus):
+        cls = MenuMixin
+        logging.info("Sending new menu to %r listeners", len(cls.waiters))
+        for callback in cls.waiters:
+            try:
+                callback(menus)
+            except:
+                logging.error("Error in waiter callback", exc_info=True)
+        cls.waiters = set()
+        cls.cache.extend(menus)
+        if len(cls.cache) > self.cache_size:
+            cls.cache = cls.cache[-self.cache_size:]
+
+
+class MenuNewHandler(BaseHandler, MenuMixin):
+    #@tornado.web.authenticated
+    def post(self):
+        menu = {
+            "id": str(uuid.uuid4()),
+            #"from": self.current_user["first_name"],
+            "from": self.get_argument("nickname"),
+            "body": self.get_argument("body"),
+        }
+        menu["html"] = self.render_string("menu.html", menu=menu)
+        if self.get_argument("next", None):
+            self.redirect(self.get_argument("next"))
+        else:
+            self.write(menu)
+        self.new_menus([menu])
+
+
+class MenuUpdatesHandler(BaseHandler, MenuMixin):
+    #@tornado.web.authenticated
+    @tornado.web.asynchronous
+    def post(self):
+        cursor = self.get_argument("cursor", None)
+        self.wait_for_menus(self.on_new_menus,
+                               cursor=cursor)
+
+    def on_new_menus(self, menus):
+        # Closed client connection
+        if self.request.connection.stream.closed():
+            return
+        self.finish(dict(menus=menus))
+
+    def on_connection_close(self):
+        self.cancel_wait(self.on_new_menus)
+
 
 class AuthLoginHandler(BaseHandler):
     @tornado.web.asynchronous
@@ -226,12 +288,68 @@ class AuthLoginHandler(BaseHandler):
         #    self.get_authenticated_user(self.async_callback(self._on_auth))
         #    return
         #self.authenticate_redirect(ax_attrs=["name"])
-        #self.write("Hello, %r" % (self.get_argument("username")))
-        #self.write("Hello,world")
-        self.render("index.html", messages=MessageMixin.cache)
+        self.write("Hello, %r" % (self.get_argument("username")))
+        #self.render("index.html", messages=MessageMixin.cache)
 
     def post(self):
-        self.write("Hello, %s" % (self.get_argument("username")))
+        print "login name:%s" % (self.get_argument("username"))
+        users = []
+        userfile = open("user.db", "r")
+        try:
+            userstrs = userfile.readlines()
+            for cur in userstrs :
+                userstr = cur.strip().split(",")
+                user = dict()
+                user["userid"] = userstr[0]
+                user["username"] = userstr[1]
+                user["userpassword"] = userstr[2]
+                user["userchname"] = userstr[3]
+                user["usersum"] = userstr[4]
+                user["usertype"] = userstr[5]
+                users.append(user)
+        except IOError, e:
+            print "open user.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            userfile.close()
+
+        loginflag = False
+        username = self.get_argument("username")
+        for user in users:
+            if username == user["username"]:
+                print user["username"]
+                loginflag = True
+        if False == loginflag:
+            return self.render("login_error.html")
+
+        #self.write("Hello, %s" % (self.get_argument("username")))
+
+        #menu = {
+        #    "id": 2001,
+        #    "menuname": "gbjd",
+        #    "menuprice": 14,
+        #}
+
+        menus = []
+        menufile = open("menu.db", "r")
+        try:
+            menustrs = menufile.readlines()
+            for cur in menustrs :
+                menustr = cur.strip().split(",")
+                menu = dict()
+                menu["menuid"] = menustr[0]
+                menu["menuname"] = menustr[1]
+                menu["menuprice"] = menustr[2]
+                menus.append(menu)
+        except IOError, e:
+            print "open menu.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            menufile.close()
+        #menu["html"] = self.render_string("menu.html", menu=menu)
+        self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus)
 
     def _on_auth(self, user):
         if not user:
