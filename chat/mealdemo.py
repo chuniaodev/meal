@@ -83,6 +83,7 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", MainHandler),
+            (r"/login", LoginHandler),
             (r"/auth/login", AuthLoginHandler),
             (r"/auth/logout", AuthLogoutHandler),
             (r"/a/message/new", MessageNewHandler),
@@ -92,7 +93,7 @@ class Application(tornado.web.Application):
         ]
         settings = dict(
             cookie_secret="43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-            login_url="/auth/login",
+            login_url="/login",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies=True,
@@ -100,13 +101,19 @@ class Application(tornado.web.Application):
         )
         tornado.web.Application.__init__(self, handlers, **settings)
 
-
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         user_json = self.get_secure_cookie("user")
         if not user_json: return None
         return tornado.escape.json_decode(user_json)
 
+class LoginHandler(BaseHandler):
+    def get(self):
+        self.render("login.html", mesg="")
+        
+    def post(self):
+        self.set_secure_cookie("user", self.get_argument("username"))
+        self.redirect("/")
 
 class MainHandler(BaseHandler):
     #@tornado.web.authenticated
@@ -177,9 +184,10 @@ class MessageMixin(object):
 class MessageNewHandler(BaseHandler, MessageMixin):
     #@tornado.web.authenticated
     def post(self):
+        print "from:%s" % (self.get_argument("username"))
         message = {
             "id": str(uuid.uuid4()),
-            #"from": self.current_user["first_name"],
+            #"from": self.get_current_user(),
             "from": self.get_argument("username"),
             "body": self.get_argument("body"),
         }
@@ -250,17 +258,37 @@ class MenuNewHandler(BaseHandler, MenuMixin):
     #@tornado.web.authenticated
     def post(self):
         menu = {
-            "id": str(uuid.uuid4()),
+            "menuid": self.get_argument("menuid"),
             #"from": self.current_user["first_name"],
-            "from": self.get_argument("nickname"),
-            "body": self.get_argument("body"),
+            #"from": self.get_argument("nickname"),
+            "menuname": "is not name",
+            "menuprice": "is not price",
         }
-        menu["html"] = self.render_string("menu.html", menu=menu)
+        menufile = open("menu.db", "r")
+        try:
+            menustrs = menufile.readlines()
+            for cur in menustrs :
+                menustr = cur.strip().split(",")
+                if menu["menuid"] == menustr[0] :
+                    menu["menuname"] = menustr[1]
+                    menu["menuprice"] = menustr[2]
+                    break
+        except IOError, e:
+            print "open menu.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            menufile.close()
+
+        menu["html"] = self.render_string("mlist.html", menu=menu)
         if self.get_argument("next", None):
             self.redirect(self.get_argument("next"))
         else:
             self.write(menu)
         self.new_menus([menu])
+
+    def get(self):
+        print "call this MenuNewHandler get"
 
 
 class MenuUpdatesHandler(BaseHandler, MenuMixin):
@@ -292,36 +320,31 @@ class AuthLoginHandler(BaseHandler):
         #self.render("index.html", messages=MessageMixin.cache)
 
     def post(self):
-        print "login name:%s" % (self.get_argument("username"))
-        users = []
+        #print "login name:%s" % (self.get_argument("username"))
+        loginflag = False
+        user = dict()
+        user["username"] = self.get_argument("username")
+        user["password"] = self.get_argument("password")
         userfile = open("user.db", "r")
         try:
             userstrs = userfile.readlines()
             for cur in userstrs :
                 userstr = cur.strip().split(",")
-                user = dict()
-                user["userid"] = userstr[0]
-                user["username"] = userstr[1]
-                user["userpassword"] = userstr[2]
-                user["userchname"] = userstr[3]
-                user["usersum"] = userstr[4]
-                user["usertype"] = userstr[5]
-                users.append(user)
+                if (user["username"] == userstr[1]) & (user["password"] == userstr[2]) :
+                    user["userid"] = userstr[0]
+                    user["userchname"] = userstr[3]
+                    user["usersum"] = userstr[4]
+                    user["usertype"] = userstr[5]
+                    loginflag = True
+                    break
         except IOError, e:
             print "open user.db error: ",e 
         except Exception, e:
             print "unable error: ",e 
         finally:
             userfile.close()
-
-        loginflag = False
-        username = self.get_argument("username")
-        for user in users:
-            if username == user["username"]:
-                print user["username"]
-                loginflag = True
         if False == loginflag:
-            return self.render("login_error.html")
+            return self.render("login.html", mesg="login error!" )
 
         #self.write("Hello, %s" % (self.get_argument("username")))
 
@@ -349,7 +372,8 @@ class AuthLoginHandler(BaseHandler):
         finally:
             menufile.close()
         #menu["html"] = self.render_string("menu.html", menu=menu)
-        self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus)
+        #self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus, user=user)
+        self.redirect("/")
 
     def _on_auth(self, user):
         if not user:

@@ -27,8 +27,36 @@ $(document).ready(function() {
         }
     });
     $("#message").select();
+
+    // add new menu lichuntao
+    $("#menuform").live("submit", function() {
+        newMenu($(this));
+        return false;
+    });
+    $("#menuform").live("keypress", function(e) {
+        if (e.keyCode == 13) {
+            newMenu($(this));
+            return false;
+        }
+    });
+    $("#menu").select();
     updater.poll();
 });
+
+function newMenu(form) {
+    var menu = form.formToDict();
+    var disabled = form.find("input[type=submit]");
+    disabled.disable();
+    $.postJSON("/a/menu/new", menu, function(response) {
+        updater.showMenu(response);
+        if (menu.id) {
+            form.parent().remove();
+        } else {
+            form.find("input[type=text]").val("").select();
+            disabled.enable();
+        }
+    });
+}
 
 function newMessage(form) {
     var message = form.formToDict();
@@ -94,11 +122,15 @@ var updater = {
         $.ajax({url: "/a/message/updates", type: "POST", dataType: "text",
                 data: $.param(args), success: updater.onSuccess,
                 error: updater.onError});
+        $.ajax({url: "/a/menu/updates", type: "POST", dataType: "text",
+                data: $.param(args), success: updater.onSuccess,
+                error: updater.onError});
     },
 
     onSuccess: function(response) {
         try {
             updater.newMessages(eval("(" + response + ")"));
+            updater.newMenus(eval("(" + response + ")"));
         } catch (e) {
             updater.onError();
             return;
@@ -130,6 +162,26 @@ var updater = {
         var node = $(message.html);
         node.hide();
         $("#inbox").append(node);
+        node.slideDown();
+    }
+
+    newMenus: function(response) {
+        if (!response.menus) return;
+        updater.cursor = response.cursor;
+        var menus = response.menus;
+        updater.cursor = menus[menus.length - 1].id;
+        console.log(menus.length, "new menus, cursor:", updater.cursor);
+        for (var i = 0; i < menus.length; i++) {
+            updater.showMenu(menus[i]);
+        }
+    },
+
+    showMenu: function(menu) {
+        var existing = $("#m" + menu.id);
+        if (existing.length > 0) return;
+        var node = $(menu.html);
+        node.hide();
+        $("#inmenubox").append(node);
         node.slideDown();
     }
 };

@@ -17,11 +17,11 @@
     <table>
         <tr>
             <td>username:</td>
-            <td><input name="username" id="usernameid" /></td>
+            <td><input type="text" name="username" id="usernameid" /></td>
         </tr>
         <tr>
             <td>password:</td>
-            <td><input name="password" id="passwordid" /></td>
+            <td><input type="password" name="password" id="passwordid" /></td>
         </tr>
         <tr>
             <td align="center"><input type="reset" value="{{ _("重置") }}"/></td>
@@ -31,6 +31,7 @@
             </td>
         </tr>
     </table>
+    {{ mesg }}
     </center>
     </form>
     </div>
@@ -44,7 +45,7 @@
             alert("用户名不能为空!");
             return false;
         }
-        else return false;
+        else return true;
     }
 </script>
 <script
