@@ -39,7 +39,7 @@ $(document).ready(function() {
             return false;
         }
     });
-    $("#menu").select();
+    $("#menuid").select();
     updater.poll();
 });
 
@@ -163,7 +163,7 @@ var updater = {
         node.hide();
         $("#inbox").append(node);
         node.slideDown();
-    }
+    },
 
     newMenus: function(response) {
         if (!response.menus) return;
