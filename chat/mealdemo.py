@@ -27,16 +27,61 @@ from tornado.options import define, options
 
 define("port", default=8888, help="run on the given port", type=int)
 
-userinfo = ()
-menuinfo = ()
-mealinfo = ()
+class UserManager(object):
 
-class UserManager():
-    def __init__():
-        pass
+    def find_user(self, username):
+        loginflag = False
+        user = dict()
+        user["username"] = username
+        userfile = open("user.db", "r")
+        try:
+            userstrs = userfile.readlines()
+            for cur in userstrs :
+                userstr = cur.strip().split(",")
+                if user["username"] == userstr[1] :
+                    user["userid"] = userstr[0]
+                    user["userchname"] = userstr[3]
+                    user["usersum"] = userstr[4]
+                    user["usertype"] = userstr[5]
+                    loginflag = True
+                    break
+        except IOError, e:
+            print "open user.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            userfile.close()
+        if False == loginflag:
+            return None
+        return user
+
     
-    def find_user():
-        pass
+    def login_check(username, password):
+        loginflag = False
+        user = dict()
+        user["username"] = username
+        user["password"] = password
+        userfile = open("user.db", "r")
+        try:
+            userstrs = userfile.readlines()
+            for cur in userstrs :
+                userstr = cur.strip().split(",")
+                if (user["username"] == userstr[1]) & (user["password"] == userstr[2]) :
+                    user["userid"] = userstr[0]
+                    user["userchname"] = userstr[3]
+                    user["usersum"] = userstr[4]
+                    user["usertype"] = userstr[5]
+                    loginflag = True
+                    break
+        except IOError, e:
+            print "open user.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            userfile.close()
+        if False == loginflag:
+            return None
+        return user
 
     def add_user():
         pass
@@ -47,20 +92,57 @@ class UserManager():
     def modify_user():
         pass
 
-class MenuManager():
-    def __init__():
+class MenuManager(object):
+    def __init__(self):
         pass
     
-    def find_menu():
+    def find_menu(self, menuid):
+        menu = dict()
+        menufile = open("menu.db", "r")
+        try:
+            menustrs = menufile.readlines()
+            for cur in menustrs :
+                menustr = cur.strip().split(",")
+                if menuid == menustr[0] :
+                    menu["menuid"] = menustr[0]
+                    menu["menuname"] = menustr[1]
+                    menu["menuprice"] = menustr[2]
+                    break
+        except IOError, e:
+            print "open menu.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            menufile.close()
+        return menu 
+
+    def travel_menu(self):
+        menus = []
+        menufile = open("menu.db", "r")
+        try:
+            menustrs = menufile.readlines()
+            for cur in menustrs :
+                menustr = cur.strip().split(",")
+                menu = dict()
+                menu["menuid"] = menustr[0]
+                menu["menuname"] = menustr[1]
+                menu["menuprice"] = menustr[2]
+                menus.append(menu)
+        except IOError, e:
+            print "open menu.db error: ",e 
+        except Exception, e:
+            print "unable error: ",e 
+        finally:
+            menufile.close()
+        return menus
+
+    def add_menu(self):
         pass
 
-    def add_menu():
+    def del_menu(self):
         pass
 
-    def del_menu():
-        pass
-
-    def modify_menu():
+    def modify_menu(self):
         pass
 
 class MealManager():
@@ -83,7 +165,6 @@ class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r"/", MainHandler),
-            (r"/login", LoginHandler),
             (r"/auth/login", AuthLoginHandler),
             (r"/auth/logout", AuthLogoutHandler),
             (r"/a/message/new", MessageNewHandler),
@@ -93,7 +174,7 @@ class Application(tornado.web.Application):
         ]
         settings = dict(
             cookie_secret="43oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
-            login_url="/login",
+            login_url="/auth/login",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             xsrf_cookies=True,
@@ -104,44 +185,29 @@ class Application(tornado.web.Application):
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         user_json = self.get_secure_cookie("user")
+        #print "user_json: %s" % (user_json)
         if not user_json: return None
-        return tornado.escape.json_decode(user_json)
-
-class LoginHandler(BaseHandler):
-    def get(self):
-        self.render("login.html", mesg="")
-        
-    def post(self):
-        self.set_secure_cookie("user", self.get_argument("username"))
-        self.redirect("/")
+        return user_json
+        #return tornado.escape.json_decode(user_json)
 
 class MainHandler(BaseHandler):
-    #@tornado.web.authenticated
+    @tornado.web.authenticated
     def get(self):
+        cusername = tornado.escape.xhtml_escape(self.current_user)
+        #print "current_userdcit: %s" % (userdict)
         #if self.get_argument("next", None):
         #    self.redirect(self.get_argument("next"))
         #else:
         #    self.write(menu)
         #self.new_menus([menu])
+        userdict = dict()
+        userManager = UserManager() 
+        userdict = userManager.find_user(cusername)
+
         menus = []
-        menufile = open("menu.db", "r")
-        try:
-            menustrs = menufile.readlines()
-            for cur in menustrs :
-                menustr = cur.strip().split(",")
-                menu = dict()
-                menu["menuid"] = menustr[0]
-                menu["menuname"] = menustr[1]
-                menu["menuprice"] = menustr[2]
-                menus.append(menu)
-        except IOError, e:
-            print "open menu.db error: ",e 
-        except Exception, e:
-            print "unable error: ",e 
-        finally:
-            menufile.close()
-        #menu["html"] = self.render_string("menu.html", menu=menu)
-        self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus)
+        menuManager = MenuManager() 
+        menus = menuManager.travel_menu()
+        self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus, user=userdict)
         #self.redirect("/auth/login")
         #self.render("login.html")
 
@@ -182,9 +248,9 @@ class MessageMixin(object):
 
 
 class MessageNewHandler(BaseHandler, MessageMixin):
-    #@tornado.web.authenticated
+    @tornado.web.authenticated
     def post(self):
-        print "from:%s" % (self.get_argument("username"))
+        #print "from:%s" % (self.get_argument("username"))
         message = {
             "id": str(uuid.uuid4()),
             #"from": self.get_current_user(),
@@ -200,7 +266,7 @@ class MessageNewHandler(BaseHandler, MessageMixin):
 
 
 class MessageUpdatesHandler(BaseHandler, MessageMixin):
-    #@tornado.web.authenticated
+    @tornado.web.authenticated
     @tornado.web.asynchronous
     def post(self):
         cursor = self.get_argument("cursor", None)
@@ -255,31 +321,13 @@ class MenuMixin(object):
 
 
 class MenuNewHandler(BaseHandler, MenuMixin):
-    #@tornado.web.authenticated
+    @tornado.web.authenticated
     def post(self):
-        menu = {
-            "menuid": self.get_argument("menuid"),
-            #"from": self.current_user["first_name"],
-            #"from": self.get_argument("nickname"),
-            "menuname": "is not name",
-            "menuprice": "is not price",
-        }
-        menufile = open("menu.db", "r")
-        try:
-            menustrs = menufile.readlines()
-            for cur in menustrs :
-                menustr = cur.strip().split(",")
-                if menu["menuid"] == menustr[0] :
-                    menu["menuname"] = menustr[1]
-                    menu["menuprice"] = menustr[2]
-                    break
-        except IOError, e:
-            print "open menu.db error: ",e 
-        except Exception, e:
-            print "unable error: ",e 
-        finally:
-            menufile.close()
-
+        menuid = self.get_argument("menuid")
+        menuManager = MenuManager() 
+        menu = menuManager.find_menu(menuid)
+        menu["from"] = self.get_argument("username")
+        #print "menu: %s" % (menu)
         menu["html"] = self.render_string("mlist.html", menu=menu)
         if self.get_argument("next", None):
             self.redirect(self.get_argument("next"))
@@ -292,7 +340,7 @@ class MenuNewHandler(BaseHandler, MenuMixin):
 
 
 class MenuUpdatesHandler(BaseHandler, MenuMixin):
-    #@tornado.web.authenticated
+    @tornado.web.authenticated
     @tornado.web.asynchronous
     def post(self):
         cursor = self.get_argument("cursor", None)
@@ -316,11 +364,11 @@ class AuthLoginHandler(BaseHandler):
         #    self.get_authenticated_user(self.async_callback(self._on_auth))
         #    return
         #self.authenticate_redirect(ax_attrs=["name"])
-        self.write("Hello, %r" % (self.get_argument("username")))
+        #self.write("Hello, %r" % (self.get_argument("username")))
         #self.render("index.html", messages=MessageMixin.cache)
+        self.render("login.html", mesg="")
 
     def post(self):
-        #print "login name:%s" % (self.get_argument("username"))
         loginflag = False
         user = dict()
         user["username"] = self.get_argument("username")
@@ -373,6 +421,7 @@ class AuthLoginHandler(BaseHandler):
             menufile.close()
         #menu["html"] = self.render_string("menu.html", menu=menu)
         #self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus, user=user)
+        self.set_secure_cookie("user", user["username"])
         self.redirect("/")
 
     def _on_auth(self, user):
