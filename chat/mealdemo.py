@@ -401,23 +401,9 @@ class AuthLoginHandler(BaseHandler):
         #    "menuprice": 14,
         #}
 
-        menus = []
-        menufile = open("menu.db", "r")
-        try:
-            menustrs = menufile.readlines()
-            for cur in menustrs :
-                menustr = cur.strip().split(",")
-                menu = dict()
-                menu["menuid"] = menustr[0]
-                menu["menuname"] = menustr[1]
-                menu["menuprice"] = menustr[2]
-                menus.append(menu)
-        except IOError, e:
-            print "open menu.db error: ",e 
-        except Exception, e:
-            print "unable error: ",e 
-        finally:
-            menufile.close()
+        #menus = []
+        #menuManager = MenuManager() 
+        #menus = menuManager.travel_menu()
         #menu["html"] = self.render_string("menu.html", menu=menu)
         #self.render("index.html", mlists=MenuMixin.cache, messages=MessageMixin.cache, menus=menus, user=user)
         self.set_secure_cookie("user", user["username"])

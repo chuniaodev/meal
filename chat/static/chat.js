@@ -46,7 +46,7 @@ $(document).ready(function() {
 function newMenu(form) {
     var menu = form.formToDict();
     var disabled = form.find("input[type=submit]");
-    disabled.disable();
+    //disabled.disable();
     var menuReqFlag = document.getElementById("menuReqFlagID");
     menuReqFlag.value = "ON"
     var menuReqFlag = document.getElementById("mesgReqFlagID");
@@ -65,7 +65,7 @@ function newMenu(form) {
 function newMessage(form) {
     var message = form.formToDict();
     var disabled = form.find("input[type=submit]");
-    disabled.disable();
+    //disabled.disable();
     var menuReqFlag = document.getElementById("menuReqFlagID");
     menuReqFlag.value = "OFF"
     var menuReqFlag = document.getElementById("mesgReqFlagID");
