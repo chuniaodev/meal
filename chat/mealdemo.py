@@ -194,7 +194,6 @@ class MainHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self):
         cusername = tornado.escape.xhtml_escape(self.current_user)
-        #print "current_userdcit: %s" % (userdict)
         #if self.get_argument("next", None):
         #    self.redirect(self.get_argument("next"))
         #else:
@@ -286,8 +285,6 @@ class MenuMixin(object):
     waiters = set()
     cache = []
     cache_size = 200
-    #menu_cache = []
-    #menu_cache_size = 200
 
     def wait_for_menus(self, callback, cursor=None):
         cls = MenuMixin
@@ -327,8 +324,9 @@ class MenuNewHandler(BaseHandler, MenuMixin):
         menuManager = MenuManager() 
         menu = menuManager.find_menu(menuid)
         menu["from"] = self.get_argument("username")
-        #print "menu: %s" % (menu)
+        menu["id"] = str(uuid.uuid4())
         menu["html"] = self.render_string("mlist.html", menu=menu)
+        #print "MN menu:%s" % (menu)
         if self.get_argument("next", None):
             self.redirect(self.get_argument("next"))
         else:
@@ -344,6 +342,7 @@ class MenuUpdatesHandler(BaseHandler, MenuMixin):
     @tornado.web.asynchronous
     def post(self):
         cursor = self.get_argument("cursor", None)
+        #print "MUH: cursor:%s" % (cursor)
         self.wait_for_menus(self.on_new_menus,
                                cursor=cursor)
 

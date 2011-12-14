@@ -39,7 +39,7 @@ $(document).ready(function() {
             return false;
         }
     });
-    //$("#menuid").select();
+    $("#menu").select();
     updater.poll();
 });
 
@@ -47,10 +47,6 @@ function newMenu(form) {
     var menu = form.formToDict();
     var disabled = form.find("input[type=submit]");
     disabled.disable();
-    var menuReqFlag = document.getElementById("menuReqFlagID");
-    menuReqFlag.value = "ON"
-    var menuReqFlag = document.getElementById("mesgReqFlagID");
-    menuReqFlag.value = "OFF"
     $.postJSON("/a/menu/new", menu, function(response) {
         updater.showMenu(response);
         if (menu.id) {
@@ -66,10 +62,6 @@ function newMessage(form) {
     var message = form.formToDict();
     var disabled = form.find("input[type=submit]");
     disabled.disable();
-    var menuReqFlag = document.getElementById("menuReqFlagID");
-    menuReqFlag.value = "OFF"
-    var menuReqFlag = document.getElementById("mesgReqFlagID");
-    menuReqFlag.value = "ON"
     $.postJSON("/a/message/new", message, function(response) {
         updater.showMessage(response);
         if (message.id) {
@@ -123,44 +115,21 @@ jQuery.fn.enable = function(opt_enable) {
 var updater = {
     errorSleepTime: 500,
     cursor: null,
-    menucursor: null,
 
     poll: function() {
         var args = {"_xsrf": getCookie("_xsrf")};
-        //console.log("url:", $.query.get('') ); 
-        var menuFlag = document.getElementById("menuReqFlagID");
-        var mesgFlag = document.getElementById("mesgReqFlagID");
-        //console.log("menuReq:", menuFlag.value ); //request.getHeader("Referer")  window.location.href 
-        //console.log("mesgReq:", mesgFlag.value ); 
-        if ("ON".indexOf(mesgFlag.value)==0) {
-            if (updater.cursor) args.cursor = updater.cursor;
-            $.ajax({url: "/a/message/updates", type: "POST", dataType: "text",
+        if (updater.cursor) args.cursor = updater.cursor;
+        $.ajax({url: "/a/message/updates", type: "POST", dataType: "text",
                 data: $.param(args), success: updater.onSuccess,
                 error: updater.onError});
-        }
-
-        if ("ON".indexOf(menuFlag.value)==0) {
-            if (updater.menucursor) args.menucursor = updater.menucursor;
-            $.ajax({url: "/a/menu/updates", type: "POST", dataType: "text",
-                data: $.param(args), success: updater.onMenuSuccess,
+        $.ajax({url: "/a/menu/updates", type: "POST", dataType: "text",
+                data: $.param(args), success: updater.onSuccess,
                 error: updater.onError});
-        }
     },
 
     onSuccess: function(response) {
         try {
             updater.newMessages(eval("(" + response + ")"));
-            //updater.newMenus(eval("(" + response + ")"));
-        } catch (e) {
-            updater.onError();
-            return;
-        }
-        updater.errorSleepTime = 500;
-        window.setTimeout(updater.poll, 0);
-    },
-
-    onMenuSuccess: function(response) {
-        try {
             updater.newMenus(eval("(" + response + ")"));
         } catch (e) {
             updater.onError();
@@ -185,27 +154,6 @@ var updater = {
         for (var i = 0; i < messages.length; i++) {
             updater.showMessage(messages[i]);
         }
-
-    },
-
-    newMenus: function(response) {
-        if (!response.menus) return;
-        updater.menucursor = response.menucursor;
-        var menus = response.menus;
-        updater.menucursor = menus[menus.length - 1].id;
-        console.log(menus.length, "new menus, menucursor:", updater.menucursor);
-        for (var i = 0; i < menus.length; i++) {
-            updater.showMenu(menus[i]);
-        }
-    },
-
-    showMenu: function(menu) {
-        var existing = $("#menu" + menu.id);
-        if (existing.length > 0) return;
-        var node = $(menu.html);
-        node.hide();
-        $("#inmenubox").append(node);
-        node.slideDown();
     },
 
     showMessage: function(message) {
@@ -217,6 +165,23 @@ var updater = {
         node.slideDown();
     }
 
+    newMenus: function(response) {
+        if (!response.menus) return;
+        updater.cursor = response.cursor;
+        var menus = response.menus;
+        updater.cursor = menus[menus.length - 1].id;
+        console.log(menus.length, "new menus, cursor:", updater.cursor);
+        for (var i = 0; i < menus.length; i++) {
+            updater.showMenu(menus[i]);
+        }
+    },
+
+    showMenu: function(menu) {
+        var existing = $("#m" + menu.id);
+        if (existing.length > 0) return;
+        var node = $(menu.html);
+        node.hide();
+        $("#inmenubox").append(node);
+        node.slideDown();
+    }
 };
-
-
