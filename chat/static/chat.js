@@ -42,7 +42,11 @@ $(document).ready(function() {
             return false;
         }
     });
+<<<<<<< HEAD
     //$("#menuid").select();
+=======
+    $("#menuid").select();
+>>>>>>> 052ffea959cde19aa0da3f911b038e0c7156bf30
     updater.poll();
 });
 
@@ -189,6 +193,16 @@ var updater = {
             updater.showMessage(messages[i]);
         }
 
+<<<<<<< HEAD
+=======
+    showMessage: function(message) {
+        var existing = $("#m" + message.id);
+        if (existing.length > 0) return;
+        var node = $(message.html);
+        node.hide();
+        $("#inbox").append(node);
+        node.slideDown();
+>>>>>>> 052ffea959cde19aa0da3f911b038e0c7156bf30
     },
 
     newMenus: function(response) {
