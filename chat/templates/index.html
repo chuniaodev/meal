@@ -10,6 +10,12 @@
         #body {
          /* position: absolute;*/
         }
+        .viewdiv{
+            float:right;
+            width:200px;
+            border:1px
+            /* solid red*/
+        }
     </style>
   </head>
   <body>
@@ -64,31 +70,51 @@
               
               <!-- 中间列,点餐面板 -->
               <td width="%30" valign="top" align="center" >
-                    青龙鼎丰电话:59426023,15330296023<br>菜单:<br>
-                    <form action="/a/menu/new" method="post" id="menuform">
-                        <input type="hidden" name="username" id="usernameid" value="{{ user["userchname"] }}"/>
-                        <input type="hidden" name="userid" id="userid" value="{{ user["username"] }}"/>
-                        <input type="hidden" name="menuReqFlag" id="menuReqFlagID" value="ON"/>
-                        <select name="menuid" id="menunameid" >
-                              {% for menu in menus %}
-							 	 {% module Template("menu.html", menu=menu) %}
-                              {% end %}
-                        </select>
-                        <input type="submit" value="{{ _("点餐") }}"/>
-                        <input type="hidden" name="next" value="{{ request.path }}"/>
-                            {% module xsrf_form_html() %}
-                    </form>
+                  <table id="mid_table" height="60%">
+                      <tbody>
+                      <tr>
+                          <td >
+                            青龙鼎丰电话:59426023,15330296023<br>菜单:<br>
+                            <form action="/a/menu/new" method="post" id="menuform">
+                                <input type="hidden" name="username" id="usernameid" value="{{ user["userchname"] }}"/>
+                                <input type="hidden" name="userid" id="userid" value="{{ user["username"] }}"/>
+                                <input type="hidden" name="menuReqFlag" id="menuReqFlagID" value="ON"/>
+                                <select name="menuid" id="menunameid" >
+                                      {% for menu in menus %}
+                                         {% module Template("menu.html", menu=menu) %}
+                                      {% end %}
+                                </select>
+                                <input type="submit" value="{{ _("点餐") }}"/>
+                                <input type="hidden" name="next" value="{{ request.path }}"/>
+                                    {% module xsrf_form_html() %}
+                            </form>
+                        </td>
+                     </tr>
+                    <tr>
+                        <td>
                         <br>
-                        {{ user["userchname"] }}&nbsp;总金额:<div id="personmenusumid">{{ user["personmenusum"] }}</div>
+                            {{ user["userchname"] }}&nbsp;总金额:&nbsp;
+                            <div class="viewdiv" id="personmenusumid">{{ user["personmenusum"] }}</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                         <br>
-                        总金额:<div id="menusumid">{{ user["menusum"] }}</div>
+                        总金额:<div class="viewdiv" id="menusumid">{{ user["menusum"] }}</div>
+                    </tr>
+                    <tr>
+                        <td>
                         <br>
-                        总数量:<div id="menunumid">{{ user["menunum"] }}</div>
+                        总数量:<div class="viewdiv" id="menunumid">{{ user["menunum"] }}</div>
+                        </td>
+                    </tr>
+                  </tbody>
+                </table>
               </td>
               
               <!-- 右侧, 个人面板-->
               <td width="%30" valign="top">
-                      今日菜单:<br>
+                      今日菜单:(暂不支持删除，请选择好之后点餐!)<br>
                       <div id="inmenubox">
                           {% for menu in mlists %}
                              {% module Template("mlist.html", menu=menu) %}
