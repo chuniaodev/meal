@@ -22,6 +22,7 @@ import tornado.options
 import tornado.web
 import os.path
 import uuid
+import string
 
 from tornado.options import define, options
 
@@ -145,6 +146,14 @@ class MenuManager(object):
     def modify_menu(self):
         pass
 
+    def get_menusum(self):
+        menusum = 0
+        mls = MenuMixin
+        for i in xrange(len(mls.cache)):
+            index = len(mls.cache) - i - 1
+            menusum += string.atoi(mls.cache[index]["menuprice"])
+        return menusum
+
 class MealManager():
     def __init__():
         pass
@@ -202,6 +211,10 @@ class MainHandler(BaseHandler):
         userdict = dict()
         userManager = UserManager() 
         userdict = userManager.find_user(cusername)
+        userdict["menunum"] = len(MenuMixin.cache)
+
+        menuManager = MenuManager() 
+        userdict["menusum"] = menuManager.get_menusum()
 
         menus = []
         menuManager = MenuManager() 
@@ -244,7 +257,6 @@ class MessageMixin(object):
         cls.cache.extend(messages)
         if len(cls.cache) > self.cache_size:
             cls.cache = cls.cache[-self.cache_size:]
-
 
 class MessageNewHandler(BaseHandler, MessageMixin):
     @tornado.web.authenticated

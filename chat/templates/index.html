@@ -77,9 +77,10 @@
                         <input type="hidden" name="next" value="{{ request.path }}"/>
                             {% module xsrf_form_html() %}
                     </form>
-                        总金额:
-                    <div id="sumid">
-                    </div>
+                        <br>
+                        总金额:<div id="menusumid">{{ user["menusum"] }}</div>
+                        <br>
+                        总数量:<div id="menunumid">{{ user["menunum"] }}</div>
               </td>
               
               <!-- 右侧, 个人面板-->

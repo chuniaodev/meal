@@ -12,6 +12,9 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
+var menunum = document.getElementById("menunumid").innerHTML;
+var menusum = document.getElementById("menusumid").innerHTML;
+//alert("top menusum:" + menusum)
 $(document).ready(function() {
     if (!window.console) window.console = {};
     if (!window.console.log) window.console.log = function() {};
@@ -194,14 +197,13 @@ var updater = {
         var menus = response.menus;
         updater.menucursor = menus[menus.length - 1].id;
         console.log(menus.length, "new menus, menucursor:", updater.menucursor);
-        var sum = 0;
-        var menunum = 0;
         for (var i = 0; i < menus.length; i++) {
+            //alert(menus[i] + "----" + menus[i].menuprice);
             updater.showMenu(menus[i]);
-            //sum += menus[i].price;
-            menunum += 1;
+            menunum = parseInt(menunum) + 1;
+            menusum = parseInt(menusum) + parseInt(menus[i].menuprice);
         }
-        document.getElementById("sumid").innerHTML = sum;
+        document.getElementById("menusumid").innerHTML = menusum;
         document.getElementById("menunumid").innerHTML = menunum;
     },
 
