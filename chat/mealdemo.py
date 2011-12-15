@@ -146,6 +146,17 @@ class MenuManager(object):
     def modify_menu(self):
         pass
 
+    def get_personmenusum(self, cname):
+        personmenusum = 0
+        mls = MenuMixin
+        #print "gpms:cname:%s" % (cname)
+        for i in xrange(len(mls.cache)):
+            index = len(mls.cache) - i - 1
+            #print "gpms:mu:%s" % (mls.cache[index]["from"])
+            if cname == mls.cache[index]["fromuserid"]:
+                personmenusum += string.atoi(mls.cache[index]["menuprice"])
+        return personmenusum
+
     def get_menusum(self):
         menusum = 0
         mls = MenuMixin
@@ -215,7 +226,9 @@ class MainHandler(BaseHandler):
 
         menuManager = MenuManager() 
         userdict["menusum"] = menuManager.get_menusum()
-
+        userdict["personmenusum"] = menuManager.get_personmenusum(cusername)
+        #print "personmenusum:%s" % (userdict["personmenusum"])
+        
         menus = []
         menuManager = MenuManager() 
         menus = menuManager.travel_menu()
@@ -336,6 +349,7 @@ class MenuNewHandler(BaseHandler, MenuMixin):
         menuManager = MenuManager() 
         menu = menuManager.find_menu(menuid)
         menu["from"] = self.get_argument("username")
+        menu["fromuserid"] = self.get_argument("userid")
         menu["id"] = str(uuid.uuid4())
         menu["html"] = self.render_string("mlist.html", menu=menu)
         #print "MN menu:%s" % (menu)

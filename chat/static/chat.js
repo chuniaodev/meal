@@ -12,9 +12,20 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-var menunum = document.getElementById("menunumid").innerHTML;
-var menusum = document.getElementById("menusumid").innerHTML;
-//alert("top menusum:" + menusum)
+//var menunum = document.getElementById("menunumid").innerHTML;
+var menunum = $("#menunumid").text();
+//var menusum = document.getElementById("menusumid").innerHTML;
+var menusum = $("#menusumid").text();
+//var userid = document.getElementById("userid").value;
+var userid = $("#userid").val();
+
+//var personmenusum = document.getElementById("personmenusumid").innerHTML;
+var personmenusum = $("#personmenusumid").text();
+//var menuReqFlag = document.getElementById("menuReqFlagID");
+//var menuReqFlag = $("#menuReqFlagID");
+//var mesgReqFlag = document.getElementById("mesgReqFlagID");
+//var mesgReqFlag = $("#mesgReqFlagID");
+//alert("val:" + $("#userid").val() )
 $(document).ready(function() {
     if (!window.console) window.console = {};
     if (!window.console.log) window.console.log = function() {};
@@ -50,10 +61,10 @@ function newMenu(form) {
     var menu = form.formToDict();
     var disabled = form.find("input[type=submit]");
     //disabled.disable();
-    var menuReqFlag = document.getElementById("menuReqFlagID");
-    menuReqFlag.value = "ON"
-    var menuReqFlag = document.getElementById("mesgReqFlagID");
-    menuReqFlag.value = "OFF"
+    //menuReqFlag.value = "ON";
+    //mesgReqFlag.value = "OFF";
+    $("#menuReqFlagID").val("ON");
+    $("#mesgReqFlagID").val("OFF");
     $.postJSON("/a/menu/new", menu, function(response) {
         updater.showMenu(response);
         if (menu.id) {
@@ -69,10 +80,10 @@ function newMessage(form) {
     var message = form.formToDict();
     var disabled = form.find("input[type=submit]");
     //disabled.disable();
-    var menuReqFlag = document.getElementById("menuReqFlagID");
-    menuReqFlag.value = "OFF"
-    var menuReqFlag = document.getElementById("mesgReqFlagID");
-    menuReqFlag.value = "ON"
+    //menuReqFlag.value = "OFF"
+    $("#menuReqFlagID").val("OFF");
+    //mesgReqFlag.value = "ON"
+    $("#mesgReqFlagID").val("ON");
     $.postJSON("/a/message/new", message, function(response) {
         updater.showMessage(response);
         if (message.id) {
@@ -131,18 +142,14 @@ var updater = {
     poll: function() {
         var args = {"_xsrf": getCookie("_xsrf")};
         //console.log("url:", $.query.get('') ); 
-        var menuFlag = document.getElementById("menuReqFlagID");
-        var mesgFlag = document.getElementById("mesgReqFlagID");
-        //console.log("menuReq:", menuFlag.value ); //request.getHeader("Referer")  window.location.href 
-        //console.log("mesgReq:", mesgFlag.value ); 
-        if ("ON".indexOf(mesgFlag.value)==0) {
+        if ("ON".indexOf($("#mesgReqFlagID").val()) == 0) {
             if (updater.cursor) args.cursor = updater.cursor;
             $.ajax({url: "/a/message/updates", type: "POST", dataType: "text",
                 data: $.param(args), success: updater.onSuccess,
                 error: updater.onError});
         }
 
-        if ("ON".indexOf(menuFlag.value)==0) {
+        if ("ON".indexOf($("#menuReqFlagID").val()) == 0) {
             if (updater.menucursor) args.menucursor = updater.menucursor;
             $.ajax({url: "/a/menu/updates", type: "POST", dataType: "text",
                 data: $.param(args), success: updater.onMenuSuccess,
@@ -188,6 +195,7 @@ var updater = {
         for (var i = 0; i < messages.length; i++) {
             updater.showMessage(messages[i]);
         }
+    },
 
     showMessage: function(message) {
         var existing = $("#m" + message.id);
@@ -209,9 +217,16 @@ var updater = {
             updater.showMenu(menus[i]);
             menunum = parseInt(menunum) + 1;
             menusum = parseInt(menusum) + parseInt(menus[i].menuprice);
+            if ( userid == menus[i].fromuserid) {
+                personmenusum = parseInt(personmenusum) + parseInt(menus[i].menuprice);
+            }
         }
-        document.getElementById("menusumid").innerHTML = menusum;
-        document.getElementById("menunumid").innerHTML = menunum;
+        //document.getElementById("menusumid").innerHTML = menusum;
+        //document.getElementById("personmenusumid").innerHTML = personmenusum;
+        //document.getElementById("menunumid").innerHTML = menunum;
+        $("#menusumid").text(menusum);
+        $("#personmenusumid").text(personmenusum);
+        $("#menunumid").text(menunum);
     },
 
     showMenu: function(menu) {

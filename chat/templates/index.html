@@ -67,6 +67,7 @@
                     青龙鼎丰电话:59426023,15330296023<br>菜单:<br>
                     <form action="/a/menu/new" method="post" id="menuform">
                         <input type="hidden" name="username" id="usernameid" value="{{ user["userchname"] }}"/>
+                        <input type="hidden" name="userid" id="userid" value="{{ user["username"] }}"/>
                         <input type="hidden" name="menuReqFlag" id="menuReqFlagID" value="ON"/>
                         <select name="menuid" id="menunameid" >
                               {% for menu in menus %}
@@ -77,6 +78,8 @@
                         <input type="hidden" name="next" value="{{ request.path }}"/>
                             {% module xsrf_form_html() %}
                     </form>
+                        <br>
+                        {{ user["userchname"] }}&nbsp;总金额:<div id="personmenusumid">{{ user["personmenusum"] }}</div>
                         <br>
                         总金额:<div id="menusumid">{{ user["menusum"] }}</div>
                         <br>
