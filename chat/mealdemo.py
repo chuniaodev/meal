@@ -213,7 +213,7 @@ class MainHandler(BaseHandler):
 class MessageMixin(object):
     waiters = set()
     cache = []
-    cache_size = 200
+    cache_size = 30
 
     def wait_for_messages(self, callback, cursor=None):
         cls = MessageMixin

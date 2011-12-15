@@ -194,9 +194,12 @@ var updater = {
         var menus = response.menus;
         updater.menucursor = menus[menus.length - 1].id;
         console.log(menus.length, "new menus, menucursor:", updater.menucursor);
+        var sum = 0;
         for (var i = 0; i < menus.length; i++) {
             updater.showMenu(menus[i]);
+            //sum += menus[i].price;
         }
+        document.getElementById("sumid").innerHTML = sum;
     },
 
     showMenu: function(menu) {
