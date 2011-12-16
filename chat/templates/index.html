@@ -90,6 +90,7 @@
                                       {% end %}
                                 </select>
                                 <input type="submit" value="{{ _("点餐") }}"/>
+                                <br><b>(暂不支持删除，请选择好之后点餐!)<b>
                                 <input type="hidden" name="next" value="{{ request.path }}"/>
                                     {% module xsrf_form_html() %}
                             </form>
@@ -119,7 +120,7 @@
               
               <!-- 右侧, 个人面板-->
               <td width="%30" valign="top">
-                      今日菜单:<b>(暂不支持删除，请选择好之后点餐!)<b><br>
+                      今日菜单:<br>
                       <div id="inmenubox">
                           {% for menu in mlists %}
                              {% module Template("mlist.html", menu=menu) %}
