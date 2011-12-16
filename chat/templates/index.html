@@ -7,8 +7,11 @@
     <style>
         /* #html { overflow-x: hidden; overflow-y: auto; }
            style="position: relative; top: expression(this.offsetParent.scrollTop);"     */
-        #body {
-         /* position: absolute;*/
+        body {
+          /* position: absolute;*/
+          /*background: #CFE8CD;*/
+          background-color: #CFE8CD;
+          margin: 10px;
         }
         .viewdiv{
             float:right;
@@ -23,8 +26,10 @@
       <table id="main_table" border="1" cellpadding="1" cellspacing="1" width="100%" >
           <tbody>
           <tr width="%100">
-              <td align="right" width="%100">
-                <div id="nav">
+              <td align="" width="%100">
+                请在10：20之前点餐，10：30开始打电话订餐。如果有变动，请在留言板交流!! <br>
+                页面是用python的tornado框架写的，如果有兴趣，欢迎大家一起维护: git@github.com:chuniaodev/meal.git
+                <div id="nav" style="float:right">
                   <a href="/auth/logout">{{ _("Sign out") }}</a>
                 </div>
               </td>
@@ -114,7 +119,7 @@
               
               <!-- 右侧, 个人面板-->
               <td width="%30" valign="top">
-                      今日菜单:(暂不支持删除，请选择好之后点餐!)<br>
+                      今日菜单:<b>(暂不支持删除，请选择好之后点餐!)<b><br>
                       <div id="inmenubox">
                           {% for menu in mlists %}
                              {% module Template("mlist.html", menu=menu) %}
