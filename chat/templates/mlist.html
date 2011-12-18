@@ -2,9 +2,10 @@
 	<div class="menu" id="menu{{ menu["id"] }}">
 		*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
 		<form id="form{{ menu["id"] }}">
-			    <script type="text/javascript">
-					//alert("cookuser:" +);
-				</script>
+			<script type="text/javascript">
+				//alert( document.getElementById("userid").value + "----");
+			    //alert("{{ menu["fromuserid"] }}");
+			</script>
 			<input type="button" value="删除" id="menudelbutton{{ menu["id"] }}" onclick='disable_menu("form{{ menu["id"] }}")'/>
 			<input type="hidden" value="hidden" id="menudisplayid" name="menudisplay"/>
 			<input type="hidden" name="menuid" value="{{ menu["id"] }}" />
