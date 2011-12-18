@@ -146,6 +146,13 @@ class MenuManager(object):
     def modify_menu(self):
         pass
 
+    def set_menudisplay(self, menuid, display):
+        mls = MenuMixin
+        for i in xrange(len(mls.cache)):
+            index = len(mls.cache) - i - 1
+            if (menuid == mls.cache[index]["id"]):
+                mls.cache[index]["display"] = display
+
     def get_personmenusum(self, cname):
         personmenusum = 0
         mls = MenuMixin
@@ -153,8 +160,9 @@ class MenuManager(object):
         for i in xrange(len(mls.cache)):
             index = len(mls.cache) - i - 1
             #print "gpms:mu:%s" % (mls.cache[index]["from"])
-            if cname == mls.cache[index]["fromuserid"]:
-                personmenusum += string.atoi(mls.cache[index]["menuprice"])
+            if ("show" == mls.cache[index]["display"]):
+                if cname == mls.cache[index]["fromuserid"]:
+                    personmenusum += string.atoi(mls.cache[index]["menuprice"])
         return personmenusum
 
     def get_menusum(self):
@@ -162,7 +170,8 @@ class MenuManager(object):
         mls = MenuMixin
         for i in xrange(len(mls.cache)):
             index = len(mls.cache) - i - 1
-            menusum += string.atoi(mls.cache[index]["menuprice"])
+            if ("show" == mls.cache[index]["display"]):
+                menusum += string.atoi(mls.cache[index]["menuprice"])
         return menusum
 
 class MealManager():
@@ -222,7 +231,7 @@ class MainHandler(BaseHandler):
         userdict = dict()
         userManager = UserManager() 
         userdict = userManager.find_user(cusername)
-        userdict["menunum"] = len(MenuMixin.cache)
+        userdict["menunum"] = len(MenuMixin.cache) #error num
 
         menuManager = MenuManager() 
         userdict["menusum"] = menuManager.get_menusum()
@@ -345,12 +354,20 @@ class MenuMixin(object):
 class MenuNewHandler(BaseHandler, MenuMixin):
     @tornado.web.authenticated
     def post(self):
+        menu = dict()
         menuid = self.get_argument("menuid")
         menuManager = MenuManager() 
         menu = menuManager.find_menu(menuid)
-        menu["from"] = self.get_argument("username")
-        menu["fromuserid"] = self.get_argument("userid")
-        menu["id"] = str(uuid.uuid4())
+        try:
+            menu["display"] = self.get_argument("menudisplay")
+            menu["id"] = menuid
+            menuManager.set_menudisplay(menuid, "hidden")
+        except:
+            menu["from"] = self.get_argument("username")
+            menu["fromuserid"] = self.get_argument("userid")
+            menu["id"] = str(uuid.uuid4())
+            menu["display"] = "show"
+
         menu["html"] = self.render_string("mlist.html", menu=menu)
         #print "MN menu:%s" % (menu)
         if self.get_argument("next", None):

@@ -1,5 +1,14 @@
-<div class="menu" id="menu{{ menu["id"] }}">
-	*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
-<!--    <input type="button" value="删除" onclick='disable_menu("menu{{ menu["id"] }}")'>
--->
-</div>
+{% if "show" == menu["display"] %}
+	<div class="menu" id="menu{{ menu["id"] }}">
+		*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
+		<form id="form{{ menu["id"] }}">
+			    <script type="text/javascript">
+					//alert("cookuser:" +);
+				</script>
+			<input type="button" value="删除" id="menudelbutton{{ menu["id"] }}" onclick='disable_menu("form{{ menu["id"] }}")'/>
+			<input type="hidden" value="hidden" id="menudisplayid" name="menudisplay"/>
+			<input type="hidden" name="menuid" value="{{ menu["id"] }}" />
+			<input type="hidden" id="fromuser" name="fromuser" value="{{ menu["fromuserid"] }}" />
+		</form>
+	</div>
+{% end %}

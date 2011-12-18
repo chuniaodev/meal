@@ -21,11 +21,11 @@ var userid = $("#userid").val();
 
 //var personmenusum = document.getElementById("personmenusumid").innerHTML;
 var personmenusum = $("#personmenusumid").text();
-//var menuReqFlag = document.getElementById("menuReqFlagID");
-//var menuReqFlag = $("#menuReqFlagID");
-//var mesgReqFlag = document.getElementById("mesgReqFlagID");
-//var mesgReqFlag = $("#mesgReqFlagID");
-//alert("val:" + $("#userid").val() )
+
+//main page menu display set
+//$("#inmenubox").append(node);
+
+
 $(document).ready(function() {
     if (!window.console) window.console = {};
     if (!window.console.log) window.console.log = function() {};
@@ -60,9 +60,7 @@ $(document).ready(function() {
 function newMenu(form) {
     var menu = form.formToDict();
     var disabled = form.find("input[type=submit]");
-    //disabled.disable();
-    //menuReqFlag.value = "ON";
-    //mesgReqFlag.value = "OFF";
+    disabled.disable();
     $("#menuReqFlagID").val("ON");
     $("#mesgReqFlagID").val("OFF");
     $.postJSON("/a/menu/new", menu, function(response) {
@@ -70,7 +68,7 @@ function newMenu(form) {
         if (menu.id) {
             form.parent().remove();
         } else {
-            form.find("input[type=text]").val("").select();
+            //form.find("input[type=text]").val("").select();
             disabled.enable();
         }
     });
@@ -79,10 +77,8 @@ function newMenu(form) {
 function newMessage(form) {
     var message = form.formToDict();
     var disabled = form.find("input[type=submit]");
-    //disabled.disable();
-    //menuReqFlag.value = "OFF"
+    disabled.disable();
     $("#menuReqFlagID").val("OFF");
-    //mesgReqFlag.value = "ON"
     $("#mesgReqFlagID").val("ON");
     $.postJSON("/a/message/new", message, function(response) {
         updater.showMessage(response);
@@ -214,16 +210,21 @@ var updater = {
         console.log(menus.length, "new menus, menucursor:", updater.menucursor);
         for (var i = 0; i < menus.length; i++) {
             //alert(menus[i] + "----" + menus[i].menuprice);
+			if ( "hidden" == menus[i].display ) {
+				$("#menu" + menus[i].id).hide();
+				continue;
+			}
             updater.showMenu(menus[i]);
             menunum = parseInt(menunum) + 1;
             menusum = parseInt(menusum) + parseInt(menus[i].menuprice);
             if ( userid == menus[i].fromuserid) {
                 personmenusum = parseInt(personmenusum) + parseInt(menus[i].menuprice);
             }
+			if ( menus[i].fromuserid != $("#userid").val() ) {
+				$("#menudelbutton" + menus[i].id).hide();
+				//alert("#menudelbutton" + menus[i].id + ":" + $("#menudelbutton" + menus[i].id).val());
+			}
         }
-        //document.getElementById("menusumid").innerHTML = menusum;
-        //document.getElementById("personmenusumid").innerHTML = personmenusum;
-        //document.getElementById("menunumid").innerHTML = menunum;
         $("#menusumid").text(menusum);
         $("#personmenusumid").text(personmenusum);
         $("#menunumid").text(menunum);
