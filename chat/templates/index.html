@@ -91,6 +91,7 @@
                                 </select>
                                 <input type="submit" value="{{ _("点餐") }}"/>
                                 <br><b>(暂不支持删除，请选择好之后点餐!)<b>
+                                <input type="hidden" name="command" value="order"/>
                                 <input type="hidden" name="next" value="{{ request.path }}"/>
                                     {% module xsrf_form_html() %}
                             </form>

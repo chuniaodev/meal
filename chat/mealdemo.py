@@ -26,7 +26,7 @@ import string
 
 from tornado.options import define, options
 
-define("port", default=6666, help="run on the given port", type=int)
+define("port", default=8888, help="run on the given port", type=int)
 
 class UserManager(object):
 
@@ -351,22 +351,29 @@ class MenuMixin(object):
             cls.cache = cls.cache[-self.cache_size:]
 
 
+
 class MenuNewHandler(BaseHandler, MenuMixin):
     @tornado.web.authenticated
     def post(self):
         menu = dict()
-        menuid = self.get_argument("menuid")
-        menuManager = MenuManager() 
-        menu = menuManager.find_menu(menuid)
-        try:
-            menu["display"] = self.get_argument("menudisplay")
-            menu["id"] = menuid
-            menuManager.set_menudisplay(menuid, "hidden")
-        except:
+        menuManager = MenuManager()
+        command = self.get_argument("command")
+        if ( "order" == command ):
+            menuid = self.get_argument("menuid")
+            menu = menuManager.find_menu(menuid)
             menu["from"] = self.get_argument("username")
             menu["fromuserid"] = self.get_argument("userid")
             menu["id"] = str(uuid.uuid4())
             menu["display"] = "show"
+        elif ( "delmenu" == command ):
+            menuid = self.get_argument("deletemenuid")
+            menu = menuManager.find_menu(menuid)
+            menu["display"] = "hidden"
+            menu["id"] = self.get_argument("menuid")
+            menuManager.set_menudisplay(menuid, menu["display"])
+
+        else :
+            print "unknown command: %s" % (command)
 
         menu["html"] = self.render_string("mlist.html", menu=menu)
         #print "MN menu:%s" % (menu)
