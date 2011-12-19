@@ -156,7 +156,6 @@ class MenuManager(object):
     def get_personmenusum(self, cname):
         personmenusum = 0
         mls = MenuMixin
-        #print "gpms:cname:%s" % (cname)
         for i in xrange(len(mls.cache)):
             index = len(mls.cache) - i - 1
             #print "gpms:mu:%s" % (mls.cache[index]["from"])
@@ -369,8 +368,9 @@ class MenuNewHandler(BaseHandler, MenuMixin):
             menuid = self.get_argument("deletemenuid")
             menu = menuManager.find_menu(menuid)
             menu["display"] = "hidden"
+            menu["fromuserid"] = self.get_argument("fromuserid")
             menu["id"] = self.get_argument("menuid")
-            menuManager.set_menudisplay(menuid, menu["display"])
+            menuManager.set_menudisplay(menu["id"], menu["display"])
 
         else :
             print "unknown command: %s" % (command)

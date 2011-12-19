@@ -212,6 +212,11 @@ var updater = {
             //alert(menus[i] + "----" + menus[i].menuprice);
 			if ( "hidden" == menus[i].display ) {
 				$("#menu" + menus[i].id).hide();
+				menunum = parseInt(menunum) - 1;
+				menusum = parseInt(menusum) - parseInt(menus[i].menuprice);
+				if ( userid == menus[i].fromuserid) {
+					personmenusum = parseInt(personmenusum) - parseInt(menus[i].menuprice);
+				}
 				continue;
 			}
             updater.showMenu(menus[i]);
