@@ -173,6 +173,15 @@ class MenuManager(object):
                 menusum += string.atoi(mls.cache[index]["menuprice"])
         return menusum
 
+    def get_menutotal(self):
+        menutotal = 0
+        mls = MenuMixin
+        for i in xrange(len(mls.cache)):
+            index = len(mls.cache) - i - 1
+            if ("show" == mls.cache[index]["display"]):
+                menutotal = menutotal + 1
+        return menutotal
+
 class MealManager():
     def __init__():
         pass
@@ -230,9 +239,9 @@ class MainHandler(BaseHandler):
         userdict = dict()
         userManager = UserManager() 
         userdict = userManager.find_user(cusername)
-        userdict["menunum"] = len(MenuMixin.cache) #error num
 
         menuManager = MenuManager() 
+        userdict["menunum"] = menuManager.get_menutotal()
         userdict["menusum"] = menuManager.get_menusum()
         userdict["personmenusum"] = menuManager.get_personmenusum(cusername)
         #print "personmenusum:%s" % (userdict["personmenusum"])

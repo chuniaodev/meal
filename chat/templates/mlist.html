@@ -1,7 +1,7 @@
 {% if "show" == menu["display"] %}
 	<div class="menu" id="menu{{ menu["id"] }}">
-		*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
 		<form id="form{{ menu["id"] }}">
+			*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
 			<input type="button" value="删除" id="menudelbutton{{ menu["id"] }}" onclick='disable_menu("form{{ menu["id"] }}")'/>
 			<script type="text/javascript">
 			    //alert("{{ menu["fromuserid"] }}");
