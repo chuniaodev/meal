@@ -26,7 +26,7 @@ import string
 
 from tornado.options import define, options
 
-define("port", default=8888, help="run on the given port", type=int)
+define("port", default=6666, help="run on the given port", type=int)
 
 class UserManager(object):
 

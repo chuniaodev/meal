@@ -2,11 +2,13 @@
 	<div class="menu" id="menu{{ menu["id"] }}">
 		*{{ menu["from"] }}: {{ menu["menuname"] }} : {{ menu["menuprice"] }} 
 		<form id="form{{ menu["id"] }}">
-			<script type="text/javascript">
-				//alert( document.getElementById("userid").value + "----");
-			    //alert("{{ menu["fromuserid"] }}");
-			</script>
 			<input type="button" value="删除" id="menudelbutton{{ menu["id"] }}" onclick='disable_menu("form{{ menu["id"] }}")'/>
+			<script type="text/javascript">
+			    //alert("{{ menu["fromuserid"] }}");
+				if ("{{ menu["fromuserid"] }}" != document.getElementById("userid").value) {
+					document.getElementById("menudelbutton{{ menu["id"] }}").type = "hidden";
+				}
+			</script>
 			<input type="hidden" value="hidden" id="menudisplayid" name="menudisplay"/>
 			<input type="hidden" name="menuid" value="{{ menu["id"] }}" />
 			<input type="hidden" id="fromuser" name="fromuser" value="{{ menu["fromuserid"] }}" />
