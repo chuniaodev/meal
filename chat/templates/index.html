@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
-    <title>Tornado Chat Demo</title>
+    <title>今天你订吗??</title>
     <!-- <link rel="stylesheet" href="{{ static_url("chat.css") }}" type="text/css"/> -->
     <style>
         /* #html { overflow-x: hidden; overflow-y: auto; }
@@ -59,6 +59,7 @@
                           <td>
                               <input type="hidden" name="mesgReqFlag" id="mesgReqFlagID" value="ON"/>
                               <input type="hidden" name="username" id="usernameid" value="{{ user["userchname"] }}"/>
+                              <input type="hidden" name="userid" id="userid" value="{{ user["username"] }}"/>
                                 {{ user["userchname"] }}:<input name="body" id="message" style="width:300px"/>
                           </td>
                           <td style="padding-left:5px">
@@ -90,7 +91,8 @@
                                       {% end %}
                                 </select>
                                 <input type="submit" value="{{ _("点餐") }}"/>
-                                <br><b>(暂不支持删除，请选择好之后点餐!)<b>
+								<br>
+								<!-- <b>(暂不支持删除，请选择好之后点餐!)<b> -->
                                 <input type="hidden" name="command" value="order"/>
                                 <input type="hidden" name="next" value="{{ request.path }}"/>
                                     {% module xsrf_form_html() %}
@@ -133,41 +135,15 @@
       </table>
       </div> 
     <script type="text/javascript">
-//        function chang_menu()
-//        {
-//            var priceid = "price" + document.getElementById("menuid").value) + "id" ;
-//            var nameid = "name" + document.getElementById("menuid").value) + "id" ;
-//            alert("priceid:" priceid + "-----" + "nameid:"nameid);
-//        }
-
-//        function setCookie(c_name,value,expiredays)
-//        {
-//        var exdate=new Date()
-//        exdate.setDate(exdate.getDate()+expiredays)
-//        document.cookie=c_name+ "=" +escape(value)+
-//        ((expiredays==null) ? "" : ";expires="+exdate.toGMTString())
-//        }
-//
-//        setCookie("user","AAA",365);
-//
-//        function getCookie(c_name)
-//        {
-//            if (document.cookie.length>0)
-//            {
-//                c_start=document.cookie.indexOf(c_name + "=")
-//                    if (c_start!=-1)
-//                    { 
-//                        c_start=c_start + c_name.length+1 
-//                            c_end=document.cookie.indexOf(";",c_start)
-//                            if (c_end==-1) c_end=document.cookie.length
-//                                return unescape(document.cookie.substring(c_start,c_end))
-//                    } 
-//            }
-//            return ""
-//        }
-//
-//        alert(getCookie("user"));
-//        document.getElementById("username").value = getCookie("user");
+		var msg = "大量大量的javascript,请访问网页之作的javascript栏目";
+		var speed = 300;
+		var msgud = " " + msg;
+		function titleScroll() {
+			if (msgud.length <msg.length) msgud += " - " + msg;
+			msgud = msgud.substring(1, msgud.length);
+			document.title = msgud.substring(0, msg.length);
+			window.setTimeout("titleScroll()", speed);
+		} 
 
         function disable_menu(formid)
         {

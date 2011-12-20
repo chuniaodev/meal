@@ -12,19 +12,13 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
-//var menunum = document.getElementById("menunumid").innerHTML;
 var menunum = $("#menunumid").text();
-//var menusum = document.getElementById("menusumid").innerHTML;
 var menusum = $("#menusumid").text();
-//var userid = document.getElementById("userid").value;
 var userid = $("#userid").val();
-
-//var personmenusum = document.getElementById("personmenusumid").innerHTML;
 var personmenusum = $("#personmenusumid").text();
 
-//main page menu display set
-//$("#inmenubox").append(node);
-
+var titlemsg = ""
+var TimeCounter
 
 $(document).ready(function() {
     if (!window.console) window.console = {};
@@ -191,15 +185,12 @@ var updater = {
         for (var i = 0; i < messages.length; i++) {
             updater.showMessage(messages[i]);
         }
-    },
-
-    showMessage: function(message) {
-        var existing = $("#m" + message.id);
-        if (existing.length > 0) return;
-        var node = $(message.html);
-        node.hide();
-        $("#inbox").append(node);
-        node.slideDown();
+        titlemsg = messages[i-1].from + " : " + messages[i-1].body;
+        if ( userid != messages[i-1].fromuserid ) {
+            titleScroll();    
+            //window.clearTimeout();
+            //window.setTimeout("titleScroll()", 500);
+        }
     },
 
     newMenus: function(response) {
@@ -210,25 +201,25 @@ var updater = {
         console.log(menus.length, "new menus, menucursor:", updater.menucursor);
         for (var i = 0; i < menus.length; i++) {
             //alert(menus[i] + "----" + menus[i].menuprice);
-			if ( "hidden" == menus[i].display ) {
-				$("#menu" + menus[i].id).hide();
-				menunum = parseInt(menunum) - 1;
-				menusum = parseInt(menusum) - parseInt(menus[i].menuprice);
-				if ( userid == menus[i].fromuserid) {
-					personmenusum = parseInt(personmenusum) - parseInt(menus[i].menuprice);
-				}
-				continue;
-			}
+            if ( "hidden" == menus[i].display ) {
+                $("#menu" + menus[i].id).hide();
+                menunum = parseInt(menunum) - 1;
+                menusum = parseInt(menusum) - parseInt(menus[i].menuprice);
+                if ( userid == menus[i].fromuserid) {
+                    personmenusum = parseInt(personmenusum) - parseInt(menus[i].menuprice);
+                }
+                continue;
+            }
             updater.showMenu(menus[i]);
             menunum = parseInt(menunum) + 1;
             menusum = parseInt(menusum) + parseInt(menus[i].menuprice);
             if ( userid == menus[i].fromuserid) {
                 personmenusum = parseInt(personmenusum) + parseInt(menus[i].menuprice);
             }
-			if ( menus[i].fromuserid != $("#userid").val() ) {
-				$("#menudelbutton" + menus[i].id).hide();
-				//alert("#menudelbutton" + menus[i].id + ":" + $("#menudelbutton" + menus[i].id).val());
-			}
+            if ( menus[i].fromuserid != $("#userid").val() ) {
+                $("#menudelbutton" + menus[i].id).hide();
+                //alert("#menudelbutton" + menus[i].id + ":" + $("#menudelbutton" + menus[i].id).val());
+            }
         }
         $("#menusumid").text(menusum);
         $("#personmenusumid").text(personmenusum);
@@ -255,4 +246,27 @@ var updater = {
 
 };
 
+var msgud = " " + titlemsg;
+function titleScroll() {
+    if (msgud.length < titlemsg.length)
+           msgud += " - " + titlemsg;
+    msgud = msgud.substring(1, msgud.length);
+    document.title = msgud.substring(0, titlemsg.length);
+    if (TimeCounter) {
+        window.clearTimeout(TimeCounter); 
+    }
+    TimeCounter = window.setTimeout("titleScroll()", 500);
+    //window.setInterval("titleScroll()", 500);
+} 
 
+function disable_menu(formid)
+{
+    newMenu($("#" + formid));
+}
+
+window.onfocus = function()
+{
+    window.clearTimeout(TimeCounter);
+    document.title = "今天你订吗??";
+    //window.clearInterval();
+}
